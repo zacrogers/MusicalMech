@@ -64,7 +64,6 @@ class MIDI(tk.Frame):
             print("stopped")
 
 
-
 if __name__ =="__main__":
     root = tk.Tk()
     root.title("Picker Damper MIDI")
