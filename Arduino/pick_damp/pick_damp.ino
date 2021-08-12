@@ -9,17 +9,31 @@ midi_msg msg = {0};
 void setup(void)
 {
     Serial.begin(115200);
+    Serial.setTimeout(1);
     init_stepper();
-    init_servos();
-    init_motor();
+    // init_servos();
+    // init_motor();
 }
 
 void loop(void)
 {
+    midi_read(&msg);
 
-    msg = midi_read(&msg);
+    if(msg.command == MIDI_NOTE_ON)
+    {
+        digitalWrite(StpDIR, HIGH);
+    }
+    if(msg.command == MIDI_NOTE_OFF)
+    {
+        digitalWrite(StpDIR, LOW);
+    }
 
+    digitalWrite(StpSTP, HIGH);
+    delay(10);
+    digitalWrite(StpSTP, LOW);
+    delay(10);
 }
+
 
 void init_stepper()
 {
@@ -40,11 +54,13 @@ void init_stepper()
     digitalWrite(StpSLP, HIGH);    
 }
 
+
 void init_servos()
 {
-    myservo1.attach(SERVO1_PIN); 
-    myservo2.attach(SERVO2_PIN); 
+    servo_1.attach(SERVO1_PIN); 
+    servo_2.attach(SERVO2_PIN); 
 }
+
 
 void init_motor()
 {
@@ -74,24 +90,20 @@ void init_motor()
 }
 
 
-midi_msg midi_read(midi_msg *msg)
+void midi_read(midi_msg *msg)
 {
-    do
-    {
-        if (Serial.available())
-        {
-            msg->command = Serial.read();            
-            msg->note = Serial.read();
-            msg->velocity = Serial.read();
-        }
-    }
-    while (Serial.available() > 2);//when at least three bytes available
+    msg->command = Serial.read();            
+    msg->note = Serial.read();
+    msg->velocity = Serial.read();
 }
+
 
 void pick(uint8_t amplitude)
 {
 
 }
+
+
 void damp(void)
 {
 

@@ -1,6 +1,7 @@
 import tkinter as tk
 import serial
 import serial.tools.list_ports as port_list
+import time
 
 MIDI_NOTE_OFF = 0x80
 MIDI_NOTE_ON  = 0x90
@@ -14,7 +15,8 @@ class MIDI(tk.Frame):
         self.timer = None
         self.serial = None
         self.ports = port_list.comports()
-        self.portname = "/dev/ttyUSB0"
+        # self.portname = "/dev/ttyUSB0"
+        self.portname = "COM4"
 
         self.init_gui()
 
@@ -34,25 +36,21 @@ class MIDI(tk.Frame):
             self.ports_box.insert(i, port)
             print(port)
         
-        self.serial = serial.Serial(self.portname, self.baud)
+        self.serial = serial.Serial(self.portname, self.baud, timeout=1)
 
 
     def pick(self):
-        print("pick")
-        self.serial.write(MIDI_NOTE_ON)
-        self.serial.write(0)
-        self.serial.write(0)
+        msg = bytearray([MIDI_NOTE_ON, 0, 0])
+        self.serial.write(msg)
 
 
     def damp(self):
-        self.serial.write(MIDI_NOTE_OFF)
-        self.serial.write(0)
-        self.serial.write(0)
+        msg = bytearray([MIDI_NOTE_OFF, 0, 0])
+        self.serial.write(msg)
 
 
     def start(self):
         timing = 1000
-
         self.timer = self.after(timing, self.start)
         self.pick()
 

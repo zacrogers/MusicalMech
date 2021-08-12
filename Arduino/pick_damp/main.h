@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <Arduino>
+// #include <Arduino>
 #include <Servo.h>
 #include <stdint.h>
 
@@ -45,7 +45,7 @@ void init_stepper();
 void init_servos();
 void init_motor();
 
-midi_msg midi_read(midi_msg *msg);
+void midi_read(midi_msg *msg);
 void pick(int amplitude);
 void damp(void);
 
