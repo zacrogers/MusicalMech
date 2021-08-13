@@ -1,22 +1,25 @@
 #include "main.h"
 
-Servo servo_1;  
-Servo servo_2;  
+Servo servo_mat_sel;  
+Servo servo_damping;  
+Encoder dc_encoder(MOT_ENCA, MOT_ENCB);
 
-
+long enc_old_pos = -999;
+long enc_new_pos = 0;
 midi_msg msg = {0};
 
 void setup(void)
 {
     Serial.begin(115200);
     Serial.setTimeout(1);
-    init_stepper();
+    // init_stepper();
     // init_servos();
-    // init_motor();
+    init_motor();
 }
 
 void loop(void)
 {
+    read_encoder(&enc_old_pos, &enc_new_pos);
     midi_read(&msg);
 
     if(msg.command == MIDI_NOTE_ON)
@@ -28,14 +31,17 @@ void loop(void)
         digitalWrite(StpDIR, LOW);
     }
 
-    digitalWrite(StpSTP, HIGH);
-    delay(10);
-    digitalWrite(StpSTP, LOW);
-    delay(10);
+
+    Serial.println(enc_new_pos);
+
+    // digitalWrite(StpSTP, HIGH);
+    // delay(10);
+    // digitalWrite(StpSTP, LOW);
+    // delay(10);
 }
 
 
-void init_stepper()
+void init_stepper(void)
 {
     pinMode(StpMS1, OUTPUT);
     pinMode(StpMS2, OUTPUT);
@@ -55,14 +61,14 @@ void init_stepper()
 }
 
 
-void init_servos()
+void init_servos(void)
 {
-    servo_1.attach(SERVO1_PIN); 
-    servo_2.attach(SERVO2_PIN); 
+    servo_mat_sel.attach(SERVO1_PIN); 
+    servo_damping.attach(SERVO2_PIN); 
 }
 
 
-void init_motor()
+void init_motor(void)
 {
     pinMode(MOT_D1, OUTPUT);
     digitalWrite(MOT_D1, LOW);
@@ -90,6 +96,17 @@ void init_motor()
 }
 
 
+void read_encoder(long *enc_old_pos, long *enc_new_pos)
+{
+    *enc_new_pos = dc_encoder.read();
+
+    if(*enc_new_pos != *enc_old_pos)
+    {
+        *enc_old_pos = *enc_new_pos;
+    }
+}
+
+
 void midi_read(midi_msg *msg)
 {
     msg->command = Serial.read();            
@@ -97,6 +114,18 @@ void midi_read(midi_msg *msg)
     msg->velocity = Serial.read();
 }
 
+
+void set_damp_material(DampMaterial mat)
+{
+    if(FOAM == mat)
+    {
+        servo_mat_sel.write(DAMP_FOAM_ANGLE);
+    }
+    if(SILICONE == mat)
+    {
+        servo_mat_sel.write(DAMP_SILICONE_ANGLE);
+    }
+}
 
 void pick(uint8_t amplitude)
 {

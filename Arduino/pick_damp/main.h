@@ -3,12 +3,13 @@
 
 // #include <Arduino>
 #include <Servo.h>
+#include <Encoder.h>
 #include <stdint.h>
 
-#define MIDI_NOTE_OFF (uint8_t)0x80
-#define MIDI_NOTE_ON  (uint8_t)0x90
-
+/* Pin assignments */
 // DC Motor pins
+#define MOT_ENCA 2
+#define MOT_ENCB 3
 #define MOT_D1   4
 #define MOT_D2   5
 #define MOT_SF   6
@@ -36,16 +37,32 @@
 #define StpSTP 26
 #define StpDIR 24
 
+
+#define MIDI_NOTE_OFF (uint8_t)0x80
+#define MIDI_NOTE_ON  (uint8_t)0x90
+
+// Servo Angles for different damping materials 
+#define DAMP_FOAM_ANGLE     0
+#define DAMP_SILICONE_ANGLE 180
+
 typedef struct
 {
     uint8_t command, note, velocity;
 }midi_msg;
 
-void init_stepper();
-void init_servos();
-void init_motor();
+typedef enum
+{
+    FOAM,
+    SILICONE
+}DampMaterial;
+
+void init_stepper(void);
+void init_servos(void);
+void init_motor(void);
+void read_encoder(long *enc_old_pos, long *enc_new_pos);
 
 void midi_read(midi_msg *msg);
+void set_damp_material(DampMaterial mat);
 void pick(int amplitude);
 void damp(void);
 

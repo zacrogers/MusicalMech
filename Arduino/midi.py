@@ -35,7 +35,11 @@ class MIDI(tk.Frame):
         for i, port in enumerate(self.ports):
             self.ports_box.insert(i, port)
             print(port)
-        
+
+        self.material_label = tk.Label(self, text="Damping Material").grid(row=0, column=1, columnspan=2)
+        self.silicone_btn = tk.Button(self, text="Silicone").grid(row=1, column=1)
+        self.foam_btn = tk.Button(self, text="Foam").grid(row=2, column=1) 
+
         self.serial = serial.Serial(self.portname, self.baud, timeout=1)
 
 
