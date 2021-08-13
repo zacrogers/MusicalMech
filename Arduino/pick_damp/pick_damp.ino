@@ -24,29 +24,43 @@ void loop(void)
     read_encoder(&enc_old_pos, &enc_new_pos);
     midi_read(&msg);
 
-    if(msg.command == MIDI_NOTE_ON)
+    switch (msg.command)
     {
-        digitalWrite(StpDIR, HIGH);
-    }
-    if(msg.command == MIDI_NOTE_OFF)
-    {
-        digitalWrite(StpDIR, LOW);
-    }
-    if(msg.command == MIDI_CC)
-    {
-        if(msg.note == FOAM || msg.note == SILICONE)
+        case MIDI_NOTE_ON:
         {
-            set_damp_material((DampMaterial)msg.note);
+            pick(msg.velocity);
+            break;
         }
+        case MIDI_NOTE_OFF:
+        {
+            damp();
+            break;
+        }
+        case MIDI_CC:
+        {
+            if(msg.note == FOAM || msg.note == SILICONE)
+            {
+                set_damp_material((DampMaterial)msg.note);
+            }            
+            break; 
+        }   
     }
 
-
-    Serial.println(enc_new_pos);
-
-    // digitalWrite(StpSTP, HIGH);
-    // delay(10);
-    // digitalWrite(StpSTP, LOW);
-    // delay(10);
+    // if(msg.command == MIDI_NOTE_ON)
+    // {
+    //     digitalWrite(StpDIR, HIGH);
+    // }
+    // if(msg.command == MIDI_NOTE_OFF)
+    // {
+    //     digitalWrite(StpDIR, LOW);
+    // }
+    // if(msg.command == MIDI_CC)
+    // {
+    //     if(msg.note == FOAM || msg.note == SILICONE)
+    //     {
+    //         set_damp_material((DampMaterial)msg.note);
+    //     }
+    // }
 }
 
 

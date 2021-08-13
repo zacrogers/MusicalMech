@@ -2,10 +2,16 @@ import tkinter as tk
 import serial
 import serial.tools.list_ports as port_list
 import time
+from enum import Enum
 
 MIDI_NOTE_OFF = 0x80
 MIDI_NOTE_ON  = 0x90
 MIDI_CC       = 0x44C
+
+class Material(Enum):
+    FOAM = 0
+    SILICONE = 1
+
 
 class MIDI(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -36,9 +42,14 @@ class MIDI(tk.Frame):
             self.ports_box.insert(i, port)
             print(port)
 
-        self.material_label = tk.Label(self, text="Damping Material").grid(row=0, column=1, columnspan=2)
-        self.silicone_btn = tk.Button(self, text="Silicone").grid(row=1, column=1)
-        self.foam_btn = tk.Button(self, text="Foam").grid(row=2, column=1) 
+        self.material_label = tk.Label(self, text="Damping Material")
+        self.material_label.grid(row=0, column=1, columnspan=2)
+
+        self.silicone_btn = tk.Button(self, text="Silicone")
+        self.silicone_btn.grid(row=1, column=1, command=lambda:self.set_damping(Material.SILICONE))
+
+        self.foam_btn = tk.Button(self, text="Foam")
+        self.foam_btn.grid(row=2, column=1, command=lambda:self.set_damping(Material.FOAM)) 
 
         self.serial = serial.Serial(self.portname, self.baud, timeout=1)
 
@@ -57,6 +68,11 @@ class MIDI(tk.Frame):
         timing = 1000
         self.timer = self.after(timing, self.start)
         self.pick()
+
+
+    def set_damping(self, material:Material):
+        msg = bytearray([MIDI_CC, material, 0])
+        self.serial.write(msg)
 
 
     def stop(self):

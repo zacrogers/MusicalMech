@@ -42,10 +42,13 @@
 #define MIDI_NOTE_ON  (uint8_t)0x90
 #define MIDI_CC       (uint8_t)0x44C
 
-
 // Servo Angles for different damping materials 
 #define DAMP_FOAM_ANGLE     0
 #define DAMP_SILICONE_ANGLE 180
+
+//Constants
+#define NUM_PICKS 5
+#define STEPS_PER_ROTATION 1800
 
 typedef struct
 {
@@ -62,7 +65,6 @@ void init_stepper(void);
 void init_servos(void);
 void init_motor(void);
 void read_encoder(long *enc_old_pos, long *enc_new_pos);
-
 void midi_read(midi_msg *msg);
 void set_damp_material(DampMaterial mat);
 void pick(int amplitude);
