@@ -37,9 +37,11 @@
 #define StpSTP 26
 #define StpDIR 24
 
-
+// Midi defines
 #define MIDI_NOTE_OFF (uint8_t)0x80
 #define MIDI_NOTE_ON  (uint8_t)0x90
+#define MIDI_CC       (uint8_t)0x44C
+
 
 // Servo Angles for different damping materials 
 #define DAMP_FOAM_ANGLE     0

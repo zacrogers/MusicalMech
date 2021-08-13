@@ -8,6 +8,8 @@ long enc_old_pos = -999;
 long enc_new_pos = 0;
 midi_msg msg = {0};
 
+int current_amplitude = 0;
+
 void setup(void)
 {
     Serial.begin(115200);
@@ -29,6 +31,13 @@ void loop(void)
     if(msg.command == MIDI_NOTE_OFF)
     {
         digitalWrite(StpDIR, LOW);
+    }
+    if(msg.command == MIDI_CC)
+    {
+        if(msg.note == FOAM || msg.note == SILICONE)
+        {
+            set_damp_material((DampMaterial)msg.note);
+        }
     }
 
 
@@ -127,8 +136,14 @@ void set_damp_material(DampMaterial mat)
     }
 }
 
+
 void pick(uint8_t amplitude)
 {
+    if(amplitude != current_amplitude)
+    {
+        //Rotate stepper
+    }
+    //Do picking
 
 }
 
