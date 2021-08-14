@@ -30,7 +30,8 @@ class MIDI(tk.Frame):
         self.pick_btn = tk.Button(self, text="Pick", command=self.pick).grid(row=0, column=0)
         self.damp_btn = tk.Button(self, text="Damp", command=self.damp).grid(row=1, column=0)
 
-        self.pick_freq = tk.Entry(self).grid(row=2, column=0)
+        self.pick_freq_var = tk.StringVar(self)
+        self.pick_freq_entry = tk.Entry(self, textvariable=self.pick_freq_var).grid(row=2, column=0)
 
         self.start_btn = tk.Button(self, text="Start", command=self.start).grid(row=3, column=0)
         self.stop_btn = tk.Button(self, text="Stop", command=self.stop).grid(row=4, column=0)
@@ -65,7 +66,11 @@ class MIDI(tk.Frame):
 
 
     def start(self):
-        timing = 1000
+        timing = self.pick_freq_var.get()
+        
+        if not timing:
+            timing = 1000
+        
         self.timer = self.after(timing, self.start)
         self.pick()
 
