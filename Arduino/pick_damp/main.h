@@ -40,11 +40,14 @@
 // Midi defines
 #define MIDI_NOTE_OFF (uint8_t)0x80
 #define MIDI_NOTE_ON  (uint8_t)0x90
-#define MIDI_CC       (uint8_t)0x44C
+#define MIDI_CC       (uint8_t)0x0B
 
 // Servo Angles for different damping materials 
-#define DAMP_FOAM_ANGLE     0
-#define DAMP_SILICONE_ANGLE 180
+#define DAMP_FOAM_ANGLE     10
+#define DAMP_SILICONE_ANGLE 150
+
+#define DAMP_ANGLE 50       //Damper in contact with string
+#define NOT_DAMP_ANGLE 100 //Damper not in contact with string
 
 //Constants
 #define NUM_PICKS 5
@@ -69,5 +72,6 @@ void midi_read(midi_msg *msg);
 void set_damp_material(DampMaterial mat);
 void pick(int amplitude);
 void damp(void);
+void undamp(void);
 
 #endif /*MAIN_H*/

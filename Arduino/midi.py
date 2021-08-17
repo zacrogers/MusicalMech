@@ -6,7 +6,7 @@ from enum import Enum
 
 MIDI_NOTE_OFF = 0x80
 MIDI_NOTE_ON  = 0x90
-MIDI_CC       = 0x44C
+MIDI_CC       = 0x0B
 
 class Material(Enum):
     FOAM = 0
@@ -46,11 +46,11 @@ class MIDI(tk.Frame):
         self.material_label = tk.Label(self, text="Damping Material")
         self.material_label.grid(row=0, column=1, columnspan=2)
 
-        self.silicone_btn = tk.Button(self, text="Silicone")
-        self.silicone_btn.grid(row=1, column=1, command=lambda:self.set_damping(Material.SILICONE))
+        self.silicone_btn = tk.Button(self, text="Silicone", command=lambda:self.set_damping(Material.SILICONE))
+        self.silicone_btn.grid(row=1, column=1)
 
-        self.foam_btn = tk.Button(self, text="Foam")
-        self.foam_btn.grid(row=2, column=1, command=lambda:self.set_damping(Material.FOAM)) 
+        self.foam_btn = tk.Button(self, text="Foam", command=lambda:self.set_damping(Material.FOAM))
+        self.foam_btn.grid(row=2, column=1) 
 
         self.serial = serial.Serial(self.portname, self.baud, timeout=1)
 
@@ -76,7 +76,7 @@ class MIDI(tk.Frame):
 
 
     def set_damping(self, material:Material):
-        msg = bytearray([MIDI_CC, material, 0])
+        msg = bytearray([MIDI_CC, material.value, 0])
         self.serial.write(msg)
 
 
