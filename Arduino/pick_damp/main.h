@@ -6,6 +6,7 @@
 #include <Encoder.h>
 #include <stdint.h>
 #include <AccelStepper.h>
+#include <util/atomic.h> // For the ATOMIC_BLOCK macro
 
 /* Pin assignments */
 // DC Motor pins
@@ -89,6 +90,9 @@ void set_damp_material(DampMaterial mat);
 
 /* Set position of amplitude stepper and rotate dc motor for picking */
 void pick(uint8_t amplitude);
+
+void set_dc_motor();
+void set_dc_pos();
 
 /* Move servo to damping position */
 void damp(void);
