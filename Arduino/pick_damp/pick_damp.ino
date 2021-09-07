@@ -4,6 +4,8 @@ Servo servo_mat_sel;
 Servo servo_damping;  
 Encoder dc_encoder(MOT_ENCA, MOT_ENCB);
 
+AccelStepper amplitude_stepper;
+
 long enc_old_pos = -999;
 long enc_new_pos = 0;
 midi_msg msg = {0};
@@ -15,16 +17,17 @@ void setup(void)
 {
     Serial.begin(115200);
     Serial.setTimeout(1);
-    init_stepper();
+    amplitude_stepper.setMaxSpeed(1000);
+    // init_stepper();
     init_servos();
-    init_motor();
+    // init_motor();
 }
 
 void loop(void)
 {
     read_encoder(&enc_old_pos, &enc_new_pos);
     midi_read(&msg);
-    undamp();
+    undamp(1500);
 
     // switch (msg.command)
     // {
@@ -65,13 +68,13 @@ void loop(void)
     }
 
     msg.command = 0;
-    if(damped)
-    {
-        digitalWrite(StpSTP, HIGH);
-        delay(10);
-        digitalWrite(StpSTP, LOW);
-        delay(10);
-    }
+    // if(damped)
+    // {
+    //     digitalWrite(StpSTP, HIGH);
+    //     delay(10);
+    //     digitalWrite(StpSTP, LOW);
+    //     delay(10);
+    // }
 }
 
 
@@ -169,6 +172,13 @@ void pick(uint8_t amplitude)
     if(amplitude != current_amplitude)
     {
         //Rotate stepper
+        int new_pos = map(amplitude, 0, 127, STEPPER_MIN, STEPPER_MAX);
+
+        amplitude_stepper.moveTo(new_pos);
+        amplitude_stepper.setSpeed(100);
+        amplitude_stepper.runSpeedToPosition();
+
+        current_amplitude = amplitude;
     }
     //Do picking
 
@@ -178,15 +188,17 @@ void pick(uint8_t amplitude)
 void damp(void)
 {
     // Damp string
-    // servo_damping.write(DAMP_ANGLE);
-    damped = true;
+    if(!damped)
+    {
+        servo_damping.write(DAMP_ANGLE);
+        damped = true;
+    }
 }
 
 
 unsigned long damper_prev_millis = 0;
-unsigned long damp_period_millis = 1500;
 
-void undamp(void)
+void undamp(unsigned long damp_period_millis)
 {
     if (!damped) return;
     
