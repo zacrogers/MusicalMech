@@ -4,7 +4,7 @@ Servo servo_mat_sel;
 Servo servo_damping;  
 Encoder dc_encoder(MOT_ENCA, MOT_ENCB);
 
-AccelStepper amplitude_stepper;
+AccelStepper amplitude_stepper(1, StpSTP, StpDIR);
 
 long enc_old_pos = -999;
 long enc_new_pos = 0;
@@ -18,7 +18,7 @@ void setup(void)
     Serial.begin(115200);
     Serial.setTimeout(1);
     amplitude_stepper.setMaxSpeed(1000);
-    // init_stepper();
+    init_stepper();
     init_servos();
     // init_motor();
 }
@@ -50,24 +50,48 @@ void loop(void)
     //         break; 
     //     }   
     // }
+    int n_steps = 100;
 
     if(msg.command == MIDI_NOTE_ON)
     {
+        // digitalWrite(StpSLP, HIGH);
+        digitalWrite(StpDIR, HIGH);
+        // for(int i = 0; i < n_steps; i++)
+        // {
+        //     digitalWrite(StpSTP, HIGH);
+        //     delay(10);
+        //     digitalWrite(StpSTP, LOW);
+        //     delay(10);
+        // }
+        // digitalWrite(StpSLP, LOW);
+
         pick(msg.velocity);
+        // pick(msg.velocity);
     }
     if(msg.command == MIDI_NOTE_OFF)
     {
-        damp();
+        // digitalWrite(StpSLP, HIGH);
+        // digitalWrite(StpDIR, LOW);
+        // for(int i = 0; i < n_steps; i++)
+        // {
+        //     digitalWrite(StpSTP, HIGH);
+        //     delay(10);
+        //     digitalWrite(StpSTP, LOW);
+        //     delay(10);
+        // }
+        // digitalWrite(StpSLP, LOW);
+        // damp();
+        pick(msg.velocity);
     }
-    if(msg.command == MIDI_CC)
-    {
-        if(msg.note == FOAM || msg.note == SILICONE)
-        {
-            set_damp_material((DampMaterial)msg.note);
-        }
-    }
+    // if(msg.command == MIDI_CC)
+    // {
+    //     if(msg.note == FOAM || msg.note == SILICONE)
+    //     {
+    //         set_damp_material((DampMaterial)msg.note);
+    //     }
+    // }
 
-    msg.command = 0;
+    // msg.command = 0;
     // if(damped)
     // {
     //     digitalWrite(StpSTP, HIGH);
@@ -174,9 +198,23 @@ void pick(uint8_t amplitude)
         //Rotate stepper
         int new_pos = map(amplitude, 0, 127, STEPPER_MIN, STEPPER_MAX);
 
-        amplitude_stepper.moveTo(new_pos);
-        amplitude_stepper.setSpeed(100);
-        amplitude_stepper.runSpeedToPosition();
+        if(amplitude > current_amplitude)
+        {
+            digitalWrite(StpDIR, LOW);
+        }
+        else
+        {
+           digitalWrite(StpDIR, HIGH); 
+        }
+
+        
+        for(int i = 0; i < new_pos; i++)
+        {
+            digitalWrite(StpSTP, HIGH);
+            delay(10);
+            digitalWrite(StpSTP, LOW);
+            delay(10);
+        }
 
         current_amplitude = amplitude;
     }
