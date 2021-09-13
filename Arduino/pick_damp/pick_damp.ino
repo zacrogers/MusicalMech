@@ -17,7 +17,7 @@ void setup(void)
 {
     Serial.begin(115200);
     Serial.setTimeout(1);
-    amplitude_stepper.setMaxSpeed(1000);
+
     init_stepper();
     init_servos();
     // init_motor();
@@ -54,34 +54,12 @@ void loop(void)
 
     if(msg.command == MIDI_NOTE_ON)
     {
-        // digitalWrite(StpSLP, HIGH);
-        digitalWrite(StpDIR, HIGH);
-        // for(int i = 0; i < n_steps; i++)
-        // {
-        //     digitalWrite(StpSTP, HIGH);
-        //     delay(10);
-        //     digitalWrite(StpSTP, LOW);
-        //     delay(10);
-        // }
-        // digitalWrite(StpSLP, LOW);
-
         pick(msg.velocity);
-        // pick(msg.velocity);
+
     }
     if(msg.command == MIDI_NOTE_OFF)
     {
-        // digitalWrite(StpSLP, HIGH);
-        // digitalWrite(StpDIR, LOW);
-        // for(int i = 0; i < n_steps; i++)
-        // {
-        //     digitalWrite(StpSTP, HIGH);
-        //     delay(10);
-        //     digitalWrite(StpSTP, LOW);
-        //     delay(10);
-        // }
-        // digitalWrite(StpSLP, LOW);
-        // damp();
-        pick(msg.velocity);
+        damp();
     }
     // if(msg.command == MIDI_CC)
     // {
@@ -193,22 +171,27 @@ void set_damp_material(DampMaterial mat)
 
 void pick(uint8_t amplitude)
 {
+    // Set amplitude
     if(amplitude != current_amplitude)
     {
-        //Rotate stepper
-        int new_pos = map(amplitude, 0, 127, STEPPER_MIN, STEPPER_MAX);
+        /* Find difference between new and current amplitude */
+        uint8_t diff = 0;
 
         if(amplitude > current_amplitude)
         {
+            diff = amplitude - current_amplitude;
             digitalWrite(StpDIR, LOW);
         }
         else
         {
-           digitalWrite(StpDIR, HIGH); 
+            diff = current_amplitude - amplitude;
+            digitalWrite(StpDIR, HIGH); 
         }
 
-        
-        for(int i = 0; i < new_pos; i++)
+        /* Move stepper to new position */
+        uint8_t new_pos = (uint8_t)map(diff, 0, 127, STEPPER_MIN, STEPPER_MAX);
+
+        for(uint8_t i = 0; i < new_pos; i++)
         {
             digitalWrite(StpSTP, HIGH);
             delay(10);
