@@ -1,7 +1,9 @@
+from ctypes import alignment
 import tkinter as tk
 import serial
 import serial.tools.list_ports as port_list
 import time
+import struct
 from enum import Enum
 
 MIDI_NOTE_OFF = 0x80
@@ -25,44 +27,64 @@ class MIDI(tk.Frame):
         self.portname = "COM4"
 
         self.init_gui()
+        
+        self.serial = serial.Serial(self.portname, self.baud, timeout=1)
 
     def init_gui(self):
-        self.pick_btn = tk.Button(self, text="Pick", command=self.pick).grid(row=0, column=0)
-        self.damp_btn = tk.Button(self, text="Damp", command=self.damp).grid(row=1, column=0)
+        # Column 0 : Manual Control
+        self.col0_label = tk.Label(self, text="Manual Control").grid(row=0, column=0)
 
-        self.pick_freq_var = tk.StringVar(self)
-        self.pick_freq_entry = tk.Entry(self, textvariable=self.pick_freq_var).grid(row=2, column=0)
+        self.pick_btn = tk.Button(self, text="Pick", command=self.pick)
+        self.pick_btn.grid(row=1, column=0, sticky=tk.NSEW, padx=10)
 
-        self.start_btn = tk.Button(self, text="Start", command=self.start).grid(row=3, column=0)
-        self.stop_btn = tk.Button(self, text="Stop", command=self.stop).grid(row=4, column=0)
+        self.damp_btn = tk.Button(self, text="Damp", command=self.damp)
+        self.damp_btn.grid(row=2, column=0, sticky=tk.NSEW, padx=10)
 
-        self.ports_box = tk.Listbox(self)
-        self.ports_box.grid(row=5, column=0)
+        self.ampl_label = tk.Label(self, text="Amplitude (0-127)").grid(row=3, column=0)
 
-        for i, port in enumerate(self.ports):
-            self.ports_box.insert(i, port)
-            print(port)
+        self.ampl_val_var = tk.IntVar(self, value=50)
+        self.ampl_val_entry = tk.Entry(self, textvariable=self.ampl_val_var)
+        self.ampl_val_entry.grid(row=4, column=0, padx=10)
 
+        # Column 1
+        self.col1_label = tk.Label(self, text="Auto Control").grid(row=0, column=1)
+
+        self.start_btn = tk.Button(self, text="Start", command=self.start)
+        self.start_btn.grid(row=1, column=1, sticky=tk.NSEW, padx=10)
+
+        self.stop_btn = tk.Button(self, text="Stop", command=self.stop)
+        self.stop_btn.grid(row=2, column=1, sticky=tk.NSEW, padx=10)
+
+        self.freq_label = tk.Label(self, text="Picking Frequency").grid(row=3, column=1)
+
+        self.pick_freq_var = tk.IntVar(self, value=50)
+        self.pick_freq_entry = tk.Entry(self, textvariable=self.pick_freq_var).grid(row=4, column=1)
+
+        # Column 2
         self.material_label = tk.Label(self, text="Damping Material")
-        self.material_label.grid(row=0, column=1, columnspan=2)
+        self.material_label.grid(row=0, column=2, sticky=tk.NSEW)
 
         self.silicone_btn = tk.Button(self, text="Silicone", command=lambda:self.set_damping(Material.SILICONE))
-        self.silicone_btn.grid(row=1, column=1)
+        self.silicone_btn.grid(row=1, column=2, sticky=tk.NSEW, padx=10)
 
         self.foam_btn = tk.Button(self, text="Foam", command=lambda:self.set_damping(Material.FOAM))
-        self.foam_btn.grid(row=2, column=1) 
-
-        self.serial = serial.Serial(self.portname, self.baud, timeout=1)
+        self.foam_btn.grid(row=2, column=2, sticky=tk.NSEW, padx=10) 
 
 
     def pick(self):
-        msg = bytearray([MIDI_NOTE_ON, 0, 0])
+        amplitude = self.ampl_val_var.get()
+        msg = bytearray([MIDI_NOTE_ON, 0, amplitude])
+        
         self.serial.write(msg)
+        self.serial.flush()
 
 
     def damp(self):
-        msg = bytearray([MIDI_NOTE_OFF, 0, 0])
+        amplitude = self.ampl_val_var.get()
+        msg = bytearray([MIDI_NOTE_OFF, 0, amplitude])
+
         self.serial.write(msg)
+        self.serial.flush()
 
 
     def start(self):

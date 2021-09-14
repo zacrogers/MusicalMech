@@ -8,7 +8,11 @@ AccelStepper amplitude_stepper(1, StpSTP, StpDIR);
 
 long enc_old_pos = -999;
 long enc_new_pos = 0;
-midi_msg msg = {0};
+midi_msg msg = {
+    .command = 0,
+    .note = 0,
+    .velocity = 0
+};
 
 int current_amplitude = 0;
 bool damped = false;
@@ -27,40 +31,17 @@ void loop(void)
 {
     read_encoder(&enc_old_pos, &enc_new_pos);
     midi_read(&msg);
-    undamp(1500);
-
-    // switch (msg.command)
-    // {
-    //     case MIDI_NOTE_ON:
-    //     {
-    //         pick(msg.velocity);
-    //         break;
-    //     }
-    //     case MIDI_NOTE_OFF:
-    //     {
-    //         damp();
-    //         break;
-    //     }
-    //     case MIDI_CC:
-    //     {
-    //         if(msg.note == FOAM || msg.note == SILICONE)
-    //         {
-    //             set_damp_material((DampMaterial)msg.note);
-    //         }            
-    //         break; 
-    //     }   
-    // }
-    int n_steps = 100;
+    // undamp(1500);
 
     if(msg.command == MIDI_NOTE_ON)
     {
         pick(msg.velocity);
-
     }
     if(msg.command == MIDI_NOTE_OFF)
     {
         damp();
     }
+
     // if(msg.command == MIDI_CC)
     // {
     //     if(msg.note == FOAM || msg.note == SILICONE)
@@ -69,14 +50,9 @@ void loop(void)
     //     }
     // }
 
-    // msg.command = 0;
-    // if(damped)
-    // {
-    //     digitalWrite(StpSTP, HIGH);
-    //     delay(10);
-    //     digitalWrite(StpSTP, LOW);
-    //     delay(10);
-    // }
+    msg.command = 0;
+    msg.note = 0;
+    msg.velocity = 0;
 }
 
 
@@ -148,23 +124,24 @@ void read_encoder(long *enc_old_pos, long *enc_new_pos)
 
 void midi_read(midi_msg *msg)
 {
-    msg->command = Serial.read();            
-    msg->note = Serial.read();
-    msg->velocity = Serial.read();
+    while(Serial.available() >= 3)
+    {
+        msg->command = Serial.read();            
+        msg->note = Serial.read();
+        msg->velocity = Serial.read();
+    }
 }
 
 
-void set_damp_material(DampMaterial mat)
+void set_damp_material(DampMaterial material)
 {
-    if(FOAM == mat)
+    if(FOAM == material)
     {
         servo_mat_sel.write(DAMP_FOAM_ANGLE);
-        // digitalWrite(StpDIR, HIGH);
     }
-    if(SILICONE == mat)
+    if(SILICONE == material)
     {
         servo_mat_sel.write(DAMP_SILICONE_ANGLE);
-        // digitalWrite(StpDIR, LOW);
     }
 }
 
@@ -194,9 +171,9 @@ void pick(uint8_t amplitude)
         for(uint8_t i = 0; i < new_pos; i++)
         {
             digitalWrite(StpSTP, HIGH);
-            delay(10);
+            delay(5);
             digitalWrite(StpSTP, LOW);
-            delay(10);
+            delay(5);
         }
 
         current_amplitude = amplitude;

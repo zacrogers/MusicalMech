@@ -52,7 +52,7 @@
 #define NOT_DAMP_ANGLE 100 //Damper not in contact with string
 
 // Limits for amplitude controlling stepper motor
-#define STEPPER_MAX 10
+#define STEPPER_MAX 100
 #define STEPPER_MIN 0
 
 //Constants
@@ -86,7 +86,7 @@ void read_encoder(long *enc_old_pos, long *enc_new_pos);
 void midi_read(midi_msg *msg);
 
 /* Rotate servo to set damping material*/
-void set_damp_material(DampMaterial mat);
+void set_damp_material(DampMaterial material);
 
 /* Set position of amplitude stepper and rotate dc motor for picking */
 void pick(uint8_t amplitude);
